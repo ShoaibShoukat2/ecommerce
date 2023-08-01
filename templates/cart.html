@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <!-- Font Awesome -->
+<link
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+rel="stylesheet"
+/>
+<!-- Google Fonts -->
+<link 
+href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+rel="stylesheet"
+/>
+<!-- MDB -->
+<link
+href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css"
+rel="stylesheet"
+/>
+</head>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+
+<script src="https://js.stripe.com/v3/"></script>
+<body>
+
+  <!-- As a link -->
+  <nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">Home</a>
+    </div>
+  </nav>
+    <section class="h-100 h-custom" style="background-color: #eee;">
+        <div class="container py-5 h-100">
+          <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col">
+              <div class="card">
+                <div class="card-body p-4">
+                  <div class="row">
+                    <!-- ... (previous code) ... -->
+                    <div class="col-lg-7">
+                      <!-- ... (previous code) ... -->
+                      {% for item in cartitems %}
+                      <div class="card mb-3">
+                        <form method="post" action="/update/{{item.id}}">
+                          {% csrf_token %}
+                          <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                              <div class="d-flex flex-row align-items-center">
+                                <div>
+                                  <img src="media/{{item.image}}" class="img-fluid rounded-3" alt="Shopping item" style="width: 65px;">
+                                </div>
+                                <div class="ms-3">
+                                  <h5>{{item.title}}</h5>
+                                </div>
+                              </div>
+                              <div class="d-flex flex-row align-items-center">
+                                <!-- Replace the static quantity value with an input field -->
+                                <div style="width: 50px;">
+                                  <input type="number"  min="1" value="{{item.quantity}}" class="form-control" style="width: 50px;" name="quantity" />
+                                </div>
+                                <div style="width: 80px;">
+                                  <h5 class="mb-0"> $ {{item.price}}</h5>
+                                </div>
+                                <div class="d-flex">
+                                  <button type="submit" style="background: none; border: none; cursor: pointer;">
+                                    <i class="fas fa-check" style="color: #cecece;"></i>
+                                  </button>
+                                  <a href="/delete_product/{{item.id}}" style="color: #cecece; margin-left: 10px;"><i class="fas fa-trash-alt"></i></a>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                      {% endfor %}
+                      <!-- ... (previous code) ... -->
+                    </div>
+                  <!-- ... (Payment Integrations) ... -->
+                    <div class="col-lg-5">
+                      <div class="card bg-primary text-white rounded-3">
+                        <div class="card-body">
+                          <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0">Card details</h5>
+                            <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-6.webp"
+                              class="img-fluid rounded-3" style="width: 45px;" alt="Avatar">
+                          </div>
+                          <p class="small mb-2">Card type</p>
+                          <a href="#!" type="submit" class="text-white"><i
+                              class="fab fa-cc-mastercard fa-2x me-2"></i></a>
+                          <a href="#!" type="submit" class="text-white"><i
+                              class="fab fa-cc-visa fa-2x me-2"></i></a>
+                          <a href="#!" type="submit" class="text-white"><i
+                              class="fab fa-cc-amex fa-2x me-2"></i></a>
+                          <a href="#!" type="submit" class="text-white"><i class="fab fa-cc-paypal fa-2x"></i></a>
+
+
+
+                          <form class="mt-4" method="post" action="/checkout/" id="checkout-form">
+                            {% csrf_token %}
+                            <div class="form-outline form-white mb-4">
+                              <input type="text" id="typeName" id="email" class="form-control form-control-lg" siez="17"
+                                placeholder="Cardholder's Name" name="email"  />
+                              <label class="form-label" for="typeName">Email address</label>
+                            </div>
+                            
+                            <div class="form-outline form-white mb-4">
+                              <input type="text" id="typeText" name="card_number" class="form-control form-control-lg" size="17"
+                                placeholder="1234 5678 9012 3457" minlength="19" maxlength="19" />
+                              <label class="form-label" for="typeText">Card Number</label>
+                            </div>
+                            
+                            <div class="row mb-4">
+                              <div class="col-md-6">
+                                <div class="form-outline form-white">
+                                  <input type="text" id="exp" name="expiration_month" class="form-control form-control-lg" placeholder="MM/YYYY"
+                                    minlength="2" maxlength="2" />
+                                  <label class="form-label" for="exp">Expiration Month</label>
+                                </div>
+                              </div>
+
+                              <div class="col-md-6">
+                                <div class="form-outline form-white">
+                                  <input type="text" id="exp" name="expiration_year" class="form-control form-control-lg" placeholder="YYYY"
+                                    minlength="4" maxlength="4" />
+                                  <label class="form-label" for="exp">Year</label>
+                                </div>
+                              </div>
+                              
+                              
+                              <div class="col-md-6 mt-4">
+                                <div class="form-outline form-white">
+                                  <input type="password" id="typeText" name="cvc" class="form-control form-control-lg"
+                                    placeholder="***" minlength="3" maxlength="3" />
+                                  <label class="form-label" for="typeText">CVC</label>
+                                </div>
+                              </div>
+                              
+                            </div>
+                            <hr class="my-4">
+                            <div class="d-flex justify-content-between mb-4" id="card-element">
+                                <p class="mb-2">Total(Incl. taxes)</p>
+                                <p class="mb-2">$ {{price}}</p>
+                            </div>
+
+                            <input type="text" hidden value="{{price}}" name="price">
+                            <div id="card-element"><!--Stripe.js injects the Card Element--></div>
+                            <button type="submit" id="submit-button" class="btn btn-info btn-block btn-lg">
+                                <div class="d-flex justify-content-between">
+                                    <span>$ {{price}}.00</span>
+                                    <span>Checkout <i class="fas fa-long-arrow-alt-right ms-2"></i></span>
+                                </div>
+                            </button>
+                          </form>
+
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </section>
+    <!-- MDB -->
+<script
+type="text/javascript"
+src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"
+></script>
+<!-- Include Stripe.js -->
+<script src="https://js.stripe.com/v3/"></script>
+
+</body>
+</html>
